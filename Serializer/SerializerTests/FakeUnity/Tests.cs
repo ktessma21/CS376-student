@@ -18,6 +18,9 @@ namespace UnityEngine.Tests
 
         [TestMethod]
         public void SerializeInt() => TestSerialize(1, "1");
+        
+       // [TestMethod]
+       // public void SerializeList() => TestSerialize()
 
         [TestMethod]
         public void SerializeFloat() => TestSerialize(1.5f, "1.5");
