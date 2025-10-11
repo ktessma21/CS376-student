@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
+
 namespace UnityEngine
 {
     /// <summary>
@@ -268,6 +269,23 @@ namespace UnityEngine
                     throw new Exception($"Unexpected character {PeekChar} found while reading object id {enclosingId}");
             }
         }
+        // private static Dictionary<string, Type> _dynamicTypes = new();
+        
+        /*private static Type CreateTypeDynamically(string typeName)
+        {
+            
+            // Create a new assembly and module in memory
+            var aName = new AssemblyName("DynamicAssembly_" + Guid.NewGuid());
+            AssemblyBuilder ab = AssemblyBuilder.DefineDynamicAssembly(aName, AssemblyBuilderAccess.Run);
+            ModuleBuilder mb = ab.DefineDynamicModule(aName.Name);
+
+            // Define a new public class
+            TypeBuilder tb = mb.DefineType(typeName, TypeAttributes.Public);
+
+            // Finalize and return the type
+            return tb.CreateType();
+        }*/
+
 
         /// <summary>
         /// Called when the next character is a #.  Read the object id of the object and return the
@@ -279,12 +297,15 @@ namespace UnityEngine
         /// <returns>The object referred to by this #id expression.</returns>
         private object ReadComplexObject(int enclosingId)
         {
-            GetChar();  // Swallow the #
+            GetChar(); // Swallow the #
             var id = (int)ReadNumber(enclosingId);
             SkipWhitespace();
 
             // You've got the id # of the object.  Are we done now?
-            throw new NotImplementedException("Fill me in");
+            if (idTable.TryGetValue(id, out var obj))
+            {
+                return obj;
+            }
 
             // Assuming we aren't done, let's check to make sure there's a { next
             SkipWhitespace();
@@ -305,15 +326,22 @@ namespace UnityEngine
                 throw new Exception(
                     $"Expected a type name (a string) in 'type: ...' expression for object id {id}, but instead got {typeName}");
 
-            // Great!  Now what?
-            throw new NotImplementedException("Fill me in");
+            // Great!  If there is an object then add it to the Id table 
+            var instance = Utilities.MakeInstance(type);
+
+       
+            idTable.Add(id, instance);
+            
 
             // Read the fields until we run out of them
             while (!End && PeekChar != '}')
             {
                 var (field, value) = ReadField(id);
+                
+                Utilities.SetFieldByName(instance, field, value);
+
                 // We've got a field and a value.  Now what?
-                throw new NotImplementedException("Fill me in");
+                // throw new NotImplementedException("Fill me in");
             }
 
             if (End)
@@ -322,7 +350,8 @@ namespace UnityEngine
             GetChar();  // Swallow close bracket
 
             // We're done.  Now what?
-            throw new NotImplementedException("Fill me in");
+            
+            return instance;
         }
 
     }

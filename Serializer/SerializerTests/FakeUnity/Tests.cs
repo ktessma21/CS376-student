@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using UnityEngine;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
 
 namespace UnityEngine.Tests
 {
@@ -8,7 +9,7 @@ namespace UnityEngine.Tests
     public class Tests
     {
         string RemoveAllWhitespace(string x) => new(x.Where(c => !char.IsWhiteSpace(c)).ToArray());
-        
+
         void TestSerialize<T>(T value, string expectedSerialization)
         {
             var serialization = Serializer.Serialize(value);
@@ -18,11 +19,24 @@ namespace UnityEngine.Tests
 
         [TestMethod]
         public void SerializeInt() => TestSerialize(1, "1");
-        
-       // [TestMethod]
-       // public void SerializeList() => TestSerialize()
 
-        [TestMethod]
+         //[TestMethod]
+        //public void SerializeList(){
+          //  List<object> mixedList = new List<object>();
+
+// Add strings to the list
+         //   mixedList.Add("Hello");
+        //    mixedList.Add("World");
+
+// Add numbers (integers, doubles, etc.) to the list
+        //    mixedList.Add(123);
+         //   mixedList.Add(45.67);
+        //    mixedList.Add(true);
+            
+        //    TestSerialize<object>(mixedList, "[\"Hello\",\"World\", 123, 45.67, True");
+        //}
+
+    [TestMethod]
         public void SerializeFloat() => TestSerialize(1.5f, "1.5");
 
         [TestMethod]

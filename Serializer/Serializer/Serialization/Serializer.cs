@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Reflection;
 
 namespace UnityEngine
 {
@@ -213,13 +214,7 @@ namespace UnityEngine
                     break;
 
                 case IList list:
-                    Write('[');
-                    foreach (var lo in list)
-                    {
-                        WriteObject(lo);
-                        Write(',');
-                    }
-                    Write(']');
+                    WriteList(list);
                     break;
 
                 default:
@@ -233,13 +228,35 @@ namespace UnityEngine
 
         /// <summary>
         /// Serialize a complex object (i.e. a class object)
-        /// If this object has already been output, just output #id, where is is it's id from GetID.
+        /// If this object has already been output, just output #id, where it's id from GetID.
         /// If it hasn't then output #id { type: "typename", field: value ... }
         /// </summary>
         /// <param name="o">Object to serialize</param>
         private void WriteComplexObject(object o)
         {
-            throw new NotImplementedException("Fill me in");
+            var (id, isNew) = GetId(o);
+            Write("#" + id);
+            
+            if (!isNew){
+                return;
+            }
+            WriteBracketedExpression(
+                "{",
+                () =>
+                {
+                    Type type = o.GetType();
+                    var name = type.Name;
+                    WriteField("type", name, true);
+
+                    FieldInfo[] allfields = type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+
+                    foreach (var field in allfields)
+                    {
+                        WriteField(field.Name, field.GetValue(o), false);
+                    }
+                },
+                "}");
+            
         }
     }
 }
